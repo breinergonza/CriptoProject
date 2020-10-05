@@ -1,0 +1,152 @@
+{% extends 'layout.html' %}
+
+{% block title %} 
+    Inicio
+{% endblock %}
+
+{% block content %}
+     <!-- Description -->
+     <section id="description" class="card">
+        <div class="card-header">
+            <h4 class="card-title">Metodo de Encripcion por RSA</h4>
+        </div>
+        <div class="card-content">
+            <div class="card-body">
+                <div class="card-text">
+                    <p>
+                        En criptografía, RSA es un sistema criptográfico de clave pública desarrollado en 1979. Es el primer y más utilizado algoritmo de este tipo y es válido tanto para cifrar como para firmar digitalmente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Pasos del Cifrado con RSA</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-body">
+                            <ul class="activity-timeline timeline-left list-unstyled">
+                                <li>
+                                    
+                                    <div class="timeline-icon bg-primary">
+                                        <i class="feather icon-check font-medium-2 align-middle"></i>
+                                    </div>
+                                    <div class="timeline-info">
+                                        <p class="font-weight-bold mb-0">Datos del archivo de texto</p>
+                                        <span class="font-small-3">
+                                            {{data_cifrar}} 
+                                        </span>
+
+                                        <div class="row">
+                                            <div class="col-md-4 text-left">
+                                                <a type="button" class="btn btn-icon btn-outline-primary waves-effect waves-light" data-toggle="tooltip" data-placement="right" title="" data-original-title="Descargar archivo de texto para el ejemplo" href="/file_view" target="_blank">
+                                                    <i class="feather icon-download"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#inlineForm">
+                                                    <i class="feather icon-upload"></i> Cargar archivo
+                                                </button>
+                                            </div>
+
+                                            <!-- Modal -->
+                                            <div class="modal fade text-left" id="inlineForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h4 class="modal-title" id="myModalLabel33">Cargar un archivo</h4>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <form action="{% url 'save' %}" method="POST" enctype="multipart/form-data">
+                                                            {% csrf_token %}
+                                                            <div class="modal-body">
+                                                                <label>Cargar un archivo</label>
+                                                                <div class="form-group">
+                                                                    <input type="file" class="form-control-file btn btn-icon btn-outline-primary waves-effect waves-light" name="file_txt">
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="submit" class="btn btn-primary">Enviar</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           
+                                        </div>
+
+                                    </div>
+                                    <small class="text-muted">Se leen los datos del archivo de texto</small>
+                                </li>
+                                <li>
+                                    <div class="timeline-icon bg-warning">
+                                        <i class="feather icon-check font-medium-2 align-middle"></i>
+                                    </div>
+                                    <div class="timeline-info">
+                                        <p class="font-weight-bold mb-0">Llave Privada</p>
+                                        <span class="font-small-3">
+                                            {{key_private}}
+                                        </span>
+
+                                        <div class="text-left">
+                                            <a type="button" class="btn btn-icon btn-outline-primary waves-effect waves-light" data-toggle="tooltip" data-placement="right" title="" data-original-title="Descargar llave privada" href="/file_private" target="_blank">
+                                                <i class="feather icon-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Clave en formato UTF8</small>
+                                </li>
+                                <li>
+                                    <div class="timeline-icon bg-danger">
+                                        <i class="feather icon-check font-medium-2 align-middle"></i>
+                                    </div>
+                                    <div class="timeline-info">
+                                        <p class="font-weight-bold mb-0">Llave Publica</p>
+                                        <span class="font-small-3">
+                                            {{key_public}}
+                                        </span>
+
+                                        <div class="text-left">
+                                            <a type="button" class="btn btn-icon btn-outline-primary waves-effect waves-light" data-toggle="tooltip" data-placement="right" title="" data-original-title="Descargar llave publica" href="/file_public" target="_blank">
+                                                <i class="feather icon-download"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Llave para la encripción de los datos</small>
+                                </li>
+                                <li>
+                                    <div class="timeline-icon bg-success">
+                                        <i class="feather icon-check font-medium-2 align-middle"></i>
+                                    </div>
+                                    <div class="timeline-info">
+                                        <p class="font-weight-bold mb-0">Datos Encriptados</p>
+                                        <span class="font-small-3">{{data_encrypt}} </span>
+                                    </div>
+                                    <small class="text-muted">Datos encriptados con la llave publica</small>
+                                </li>
+                                <li>
+                                    <div class="timeline-icon bg-primary">
+                                        <i class="feather icon-check font-medium-2 align-middle"></i>
+                                    </div>
+                                    <div class="timeline-info">
+                                        <p class="font-weight-bold mb-0">Datos Desencriptados</p>
+                                        <span class="font-small-3">
+                                            {{data_decript}}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">Datos desencriptados con la llave privada</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <!--/ Description -->
+{% endblock %}
