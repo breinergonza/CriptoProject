@@ -1,1 +1,1 @@
-web: gunicorn cifradoapp.wsgi --log-file=-
+web: gunicorn cifradoapp.wsgi --log-file -
