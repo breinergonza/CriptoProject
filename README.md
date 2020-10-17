@@ -1,3 +1,3 @@
-# CriptoProjectRsa
+# CriptoProject
 
-Proyecto de Encripción con RSA
+Proyecto de Encripción con Django
