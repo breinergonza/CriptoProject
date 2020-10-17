@@ -2,7 +2,8 @@ import Crypto
 import binascii
 import os 
 
-from django.http import request
+from django.conf import settings
+from django.http import request,HttpResponse, Http404
 from django.shortcuts import HttpResponseRedirect, render, HttpResponse, redirect
 
 from Crypto.PublicKey import RSA
@@ -97,8 +98,9 @@ def file_public(request):
 
     filename = "./cifradoapp/cifrado/keys/public.pem"
     data = open(filename, "rb").read()
-    response = HttpResponse(data, content_type="application/vnd")
+    response = HttpResponse(data, content_type="application/x-pem-file")
     response["Content-Length"] = os.path.getsize(filename)
+    response["Content-Disposition"] = 'attachment; filename="public_key.pem"'
     
     return response
 
@@ -106,28 +108,30 @@ def file_private(request):
 
     filename = "./cifradoapp/cifrado/keys/private.pem"
     data = open(filename, "rb").read()
-    response = HttpResponse(data, content_type="application/vnd")
+    response = HttpResponse(data, content_type="application/x-pem-file")
     response["Content-Length"] = os.path.getsize(filename)
+    response["Content-Disposition"] = 'attachment; filename="private_key.pem"'
     
     return response
 
 def save_file(request):
 
     if request.method == 'POST':
-        #fileTxt = request.POST['file_txt']
-
-        print("Entra!!")
-
         form = UploadFileForm(request.POST, request.FILES)
-
-        print("Pasa!")
-
         handle_uploaded_file(request.FILES['file_txt'])
 
     return HttpResponseRedirect('/index/')
-
 
 def handle_uploaded_file(f):    
     with open('./cifradoapp/cifrado/archivos/ejemplo.txt', 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
+
+def download(request, path):
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+    raise Http404
