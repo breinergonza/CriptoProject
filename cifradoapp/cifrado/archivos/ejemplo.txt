@@ -1,2 +1,2 @@
-He asistido asiduamente a las funciones del gran circo político colombiano y allí he tenido la oportunidad de ver elefantes blancos sdfdsgdfgfdgdfgdfg
-Test
+Performance considerations,
+Django is designed for short-lived requests. Streaming responses will tie a worker process for the entire duration of the response. This may result in poor performance.
