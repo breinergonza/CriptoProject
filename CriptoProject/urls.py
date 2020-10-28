@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls.conf import include
 
 #Importar app con  las vistas
 from cifradoapp import views
@@ -27,4 +28,6 @@ urlpatterns = [
     path('file_public/', views.file_public),
     path('guardar/',  views.save_file, name="save"),
     path('admin/', admin.site.urls),
+
+    path('api/account/', include('cifradoapp.api.urls', 'account_api'))
 ]
