@@ -23,11 +23,20 @@ from cifradoapp import views
 urlpatterns = [
     path('', views.index),
     path('index/', views.index),
+
     path('file_view/', views.file_text),
     path('file_private/', views.file_private),
     path('file_public/', views.file_public),
     path('guardar/',  views.save_file, name="save"),
     path('admin/', admin.site.urls),
 
-    path('api/account/', include('cifradoapp.api.urls', 'account_api'))
+    path('api/register/', views.register_view, name="register"),
+
+    path('api/account/', include('cifradoapp.api.urls', 'account_api')),
+
+    path('hello/', views.HelloView.as_view(), name='hello'),
+
+    path('code/', views.CodeText.as_view(), name='code'),
+
+    path('gKeyDsa/', views.GenerateKeysDsa.as_view(), name='gDeyRsa')
 ]

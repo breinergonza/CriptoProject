@@ -29,3 +29,5 @@ class RegistrationSerializer(serializers.ModelSerializer):
         account.save()
 
         return account
+
+
