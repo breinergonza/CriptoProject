@@ -154,14 +154,28 @@ def save_file(request):
 
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
-        handle_uploaded_file(request.FILES['file_txt'])
+        handle_uploaded_file(request.FILES['file_txt'], "ejemplo.txt")
 
     return HttpResponseRedirect('/index/')
 
-def handle_uploaded_file(f):    
-    with open('./cifradoapp/cifrado/archivos/ejemplo.txt', 'wb+') as destination:
+    """
+    Metodo para cargar una archivo de texto
+    """
+def handle_uploaded_file(f):
+    nom = binascii.hexlify(get_random_bytes(4)).decode('utf8')
+    print(nom)
+    with open(f'./cifradoapp/cifrado/archivos/{nom}.txt', 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
+
+def handle_uploaded_file_api(f):
+    nom = binascii.hexlify(get_random_bytes(4)).decode('utf8')
+    print(nom)
+    file = f'./cifradoapp/cifrado/archivos/{nom}.txt'
+    with open(file, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    return file
 
 def download(request, path):
     file_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -173,24 +187,34 @@ def download(request, path):
     raise Http404
 
 
-    """Codificacion
-        Metodo que permite cifrar información
-    Returns:
-        json: message
-    """
+"""Codificacion
+    Metodo que permite firmar la información
+Returns:
+    json: message
+"""
 class CodeText(APIView):
     # permission_classes = (IsAuthenticated,)
     def post(self, request):
 
         info=request.data
 
-        msgCifrar = info['msg']
+        nombreCertificado = info['nombreCertificado']
+        apellido = info['apellido']
+        nombre = info['nombre']
+        id_clave = info['idClave']
+        pin = info['pin']
 
-        print(msgCifrar)        
-    
-        # Sign a message
+        form = UploadFileForm(request.POST, request.FILES)
+        fil = handle_uploaded_file_api(request.FILES['file_txt'])
+
+        print("Archivo : " + fil)              
+
+        # Mensaje a crifrar
+        msgArchivo = open(fil, "r")
+        msgCifrar = msgArchivo.read()
         message = msgCifrar        
 
+        # Se genera el hash del texto
         hash_obj = SHA256.new(message.encode("utf8"))
 
         # Se lee la llave privada
@@ -202,171 +226,89 @@ class CodeText(APIView):
 
         print(dts)
     
-        # Load the public key
+        # Se lee la llave publica
         f = open("./cifradoapp/cifrado/keys/der/public_key_dsa.pem", "r")
-
-        hash_obj = SHA256.new(message.encode("utf8"))
-        
+        hash_obj = SHA256.new(message.encode("utf8"))        
         pub_key = DSA.import_key(f.read())
 
         verifier = DSS.new(pub_key, 'fips-186-3')
-    
-        # Verify the authenticity of the message
+
+        msgSalida = f'Firma Digital: { signature }      Longitud de la firma: 368      Algoritmo: RSA      Función Hash: SHA-256       Clave: [{apellido}][{nombre}][DSA-1024][{pin}]       Mensaje: {message}'
+
+        print(msgSalida)
+
+        #Se genera el archivo con la llave privada
+        nomArchivo = binascii.hexlify(get_random_bytes(4)).decode('utf8')        
+        signa_file_out = open(f'./cifradoapp/cifrado/archivos_firmados/{nomArchivo}.hex', "wb")
+        signa_file_out.write(str.encode(msgSalida))
+        signa_file_out.close()
+
+        # Se valida la autenticidad de la firma
         try:
             verifier.verify(hash_obj, signature)
-            print("The message is authentic.")
+            print("El mesaje generado fue validado.")
         except ValueError:
-            print ("The message is not authentic.")
-
-        # print(signature)
+            print ("El mensaje generado no pudo ser validado.")
 
         data = {
-            "original": info['msg'],
-            "code": dts
+            "original": message,
+            "firma": dts,
+            "codigo_archivo": nomArchivo
         }
 
         return Response(data)
-
-
-
-# def cifrado(request):
-
-#     #Se genera un numero random
-#     ramdom_gen = Crypto.Random.new().read
-
-#     #Se genera una llave privada
-#     private_key = RSA.generate(2048, ramdom_gen)
-
-#     #Generamos una llave publica
-#     public_key = private_key.publickey()
-
-#     #Convertimos las llaves en utf8 para poder leerlas y mostrarlas
-#     private_key = private_key.exportKey(format='DER')
-#     public_key = public_key.exportKey(format='DER')
-
-#     #Se genera el archivo con la llave privada
-#     file_out = open("./cifradoapp/cifrado/keys/der/private.der", "wb")
-#     file_out.write(private_key)
-#     file_out.close()
-
-#     #Se genera el archivo con la llave publica
-#     file_out = open("./cifradoapp/cifrado/keys/der/public.der", "wb")
-#     file_out.write(public_key)
-#     file_out.close()
-
-#     private_key = binascii.hexlify(private_key).decode('utf8')
-#     public_key = binascii.hexlify(public_key).decode('utf8')
-
-#     llave_privada = private_key
-#     llave_publica = public_key
-
-#     #Se realiza el proceso inverso para utilizarlas en el cifrado
-#     private_key = RSA.importKey(binascii.unhexlify(private_key))
-#     public_key = RSA.importKey(binascii.unhexlify(public_key))
-
-#     #Se cargan los datos del archivo
-#     archivo = open("./cifradoapp/cifrado/archivos/ejemplo.txt", "r")
-
-#     #Se lee el archivo con los datos a encriptar
-#     datosArchivo = archivo.read()
-
-#     #Se codifica el mensaje
-#     data = datosArchivo.encode("utf-8")
-
-#     #Ciframos el texto el mensaje con la llave publica
-#     cipher_rsa = PKCS1_OAEP.new(public_key)
-#     encripted_msg = cipher_rsa.encrypt(data)
-
-#     print('************** Mensaje Encriptado **************')
-#     print(encripted_msg)
-#     print('************************************************')
-
-#     #Desencriptamos el mensaje con la llave privada
-#     cipher_rsa = PKCS1_OAEP.new(private_key)
-#     decripted_msg = cipher_rsa.decrypt(encripted_msg).decode('utf-8') 
-
-#     print('************** Mensaje Desencriptado **************')
-#     print(decripted_msg)
-#     print('************************************************')
-
-#     return render(request, 'index.html', {
-#         'data_cifrar': datosArchivo,
-#         'key_private':llave_privada,
-#         'key_public':llave_publica,
-#         'data_encrypt':encripted_msg,
-#         'data_decript':decripted_msg    
-#     })
-
 
 class DeCodeText(APIView):
-    # permission_classes = (IsAuthenticated,)
-    def post(self, request):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):        
 
-        info=request.data
+        info=request.data       
 
-        msgDesCifrar = info['msg']
+        msgDesCifrar = info['original']
+        msgCodificado = info['code']
+        msgResp = ""
+        success = False
 
+        print("Mensaje a descifrar: " + msgDesCifrar)
+
+        signature = bytes.fromhex(msgCodificado)
+
+        key = DSA.import_key(open('./cifradoapp/cifrado/keys/der/public_key_dsa.pem').read())
+        h = SHA256.new(msgDesCifrar.encode("utf8"))
+        verifier = DSS.new(key, 'fips-186-3')
         
-        key = RSA.importKey(open('./cifradoapp/cifrado/keys/der/private_key_dsa.').read())
-    
-        dsize = SHA.digest_size
-
-        sentinel = Random.new().read(16+dsize)      # Let's assume that average data length is 15
-    
-        cipher = PKCS1_v1_5.new(key)
-        message = cipher.decrypt(ciphertext, sentinel)
-    
-        digest = SHA.new(message[:-dsize]).digest()
-        if digest==message[-dsize:]:                # Note how we DO NOT look for the sentinel
-            print("Encryption was correct.")
-        else:
-            print("Encryption was not correct.")
-
-
-        # Se lee la llave privada
-        key = DSA.import_key(open("./cifradoapp/cifrado/keys/der/private_key_dsa.pem").read())
-        signer = DSS.new(key, 'fips-186-3')
-        signature = signer.sign(hash_obj)
-
-        dts = binascii.hexlify(signature).decode('utf8')
-
-        print(dts)
-    
-        # Load the public key
-        f = open("./cifradoapp/cifrado/keys/der/public_key_dsa.pem", "r")
-
-        hash_obj = SHA256.new(message.encode("utf8"))
-        
-        pub_key = DSA.import_key(f.read())
-
-        verifier = DSS.new(pub_key, 'fips-186-3')
-    
-        # Verify the authenticity of the message
         try:
-            verifier.verify(hash_obj, signature)
-            print("The message is authentic.")
+            verifier.verify(h, signature)
+            success = True
+            msgResp = "The message is authentic... LOL"
+            print(msgResp)
         except ValueError:
-            print ("The message is not authentic.")
-
-        # print(signature)
+            msgResp = "The message is not authentic"
+            print (msgResp)
 
         data = {
-            "original": info['msg'],
-            "code": dts
+            "success": success,
+            "result": msgResp
         }
 
         return Response(data)
 
 
-
-
+"""
+    Metodo que permite actualizar
+    y regenerar las llav es publica y privada
+Returns:
+    [type]: [description]
+"""
 class GenerateKeysDsa(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
 
+        # Generamos la sal
+        salt = get_random_bytes(16)
+
         # Create a new DSA key
         private_key = DSA.generate(2048)
-        key = private_key
         public_key = private_key.publickey()
 
         #Convertimos las llaves en utf8 para poder leerlas y mostrarlas
@@ -383,5 +325,35 @@ class GenerateKeysDsa(APIView):
         file_out.write(public_key)
         file_out.close()
 
-        content = {'sucess': True, 'message': 'Llaves generadas con exito'}
+        llave_privada = binascii.hexlify(private_key).decode('utf8') 
+        llave_publica = binascii.hexlify(public_key).decode('utf8')
+
+        content = {
+            'sucess': True, 
+            'message': 'Llaves generadas con exito',
+            'data': {
+                'public_key': llave_publica,
+                'private_key':llave_privada
+            }}
+
         return Response(content)
+
+        """API que devuelve un archivo de texto cifrado
+
+        Returns:
+            [type]: [text/plain]
+        """
+class SendFile(APIView):
+    def get(self, request):
+        
+        archivo = self.request.query_params.get('file', None)
+
+        if archivo is not None:
+            file_path = f'./cifradoapp/cifrado/archivos_firmados/{archivo}.hex'
+
+            with open(file_path, 'r') as file:
+                response = HttpResponse(file, content_type='text/*')
+                response['Content-Disposition'] = f'attachment; filename={archivo}.hex'
+                return response
+
+        return {'success': False, 'msg': 'Archivo no encontrado'}        

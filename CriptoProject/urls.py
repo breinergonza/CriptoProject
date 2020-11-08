@@ -38,5 +38,9 @@ urlpatterns = [
 
     path('code/', views.CodeText.as_view(), name='code'),
 
-    path('gKeyDsa/', views.GenerateKeysDsa.as_view(), name='gDeyRsa')
+    path('decode/', views.DeCodeText.as_view(), name='decode'),
+
+    path('gKeyDsa/', views.GenerateKeysDsa.as_view(), name='gDeyRsa'),
+
+    path('getFile/', views.SendFile.as_view(), name='getFile')
 ]
