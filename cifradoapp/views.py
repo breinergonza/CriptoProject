@@ -338,11 +338,11 @@ class GenerateKeysDsa(APIView):
 
         return Response(content)
 
-        """API que devuelve un archivo de texto cifrado
+"""API que devuelve un archivo de texto cifrado
 
-        Returns:
-            [type]: [text/plain]
-        """
+Returns:
+    [type]: [text/plain]
+"""
 class SendFile(APIView):
     def get(self, request):
         
@@ -352,7 +352,7 @@ class SendFile(APIView):
             file_path = f'./cifradoapp/cifrado/archivos_firmados/{archivo}.hex'
 
             with open(file_path, 'r') as file:
-                response = HttpResponse(file, content_type='text/*')
+                response = HttpResponse(file, content_type='text/plain')
                 response['Content-Disposition'] = f'attachment; filename={archivo}.hex'
                 return response
 
