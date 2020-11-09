@@ -1,6 +1,6 @@
 # CriptoProject
 
-Proyecto de Encripción con Django para el desarrollo de los laboratorios de Criptografia para la MCIC.
+Proyecto en Django para el desarrollo de los laboratorios desarrollados en la clase de Criptografia para la MCIC.
 
 ## 1ro. Se restauran los componentes necesarios
 
