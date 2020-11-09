@@ -24,6 +24,8 @@ urlpatterns = [
     path('', views.index),
     path('index/', views.index),
 
+    path('rsa/', views.encript_rsa),
+
     path('file_view/', views.file_text),
     path('file_private/', views.file_private),
     path('file_public/', views.file_public),

@@ -31,12 +31,21 @@ from rest_framework.views import APIView
 
 from rest_framework.permissions import IsAuthenticated
 
+
 class HelloView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
 
+        """Registro de usuarios via POST
+
+        Raises:
+            Http404: [description]
+
+        Returns:
+            [type]: [description]
+        """
 @api_view(['POST',])
 def register_view(request):
     if request.method == 'POST':
@@ -47,13 +56,17 @@ def register_view(request):
             data['response'] = "successfully a new user."
             data['email'] = account.email
             data['username'] = account.username
-            # token = Token.objects.create(user=account)
-            # print(token.key)
         else:
             data = serializer.errors
         return Response(data)
 
+    """Pagina inicial
+    """
 def index(request):
+    return render(request, 'index.html', {})
+
+
+def encript_rsa(request):
 
     #Se genera un numero random
     ramdom_gen = Crypto.Random.new().read
@@ -113,13 +126,16 @@ def index(request):
     print(decripted_msg)
     print('************************************************')
 
-    return render(request, 'index.html', {
+    return render(request, 'encriptRsa.html', {
         'data_cifrar': datosArchivo,
         'key_private':llave_privada,
         'key_public':llave_publica,
         'data_encrypt':encripted_msg,
         'data_decript':decripted_msg    
     })
+
+
+
 
 def file_text(request):
 
@@ -265,12 +281,11 @@ class DeCodeText(APIView):
         info=request.data       
 
         msgDesCifrar = info['original']
-        msgCodificado = info['code']
+        msgCodificado = info['firma']
         msgResp = ""
         success = False
 
-        print("Mensaje a descifrar: " + msgDesCifrar)
-
+        print("Mensaje a validar: " + msgDesCifrar)
         signature = bytes.fromhex(msgCodificado)
 
         key = DSA.import_key(open('./cifradoapp/cifrado/keys/der/public_key_dsa.pem').read())
@@ -280,10 +295,10 @@ class DeCodeText(APIView):
         try:
             verifier.verify(h, signature)
             success = True
-            msgResp = "The message is authentic... LOL"
+            msgResp = "The message is authentic... Yey!!"
             print(msgResp)
         except ValueError:
-            msgResp = "The message is not authentic"
+            msgResp = "The message is not authentic... :( "
             print (msgResp)
 
         data = {
