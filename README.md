@@ -26,7 +26,9 @@ python manage.py runserver
 python manage.py runserver 0.0.0.0:8000
 ```
 
-## Si se agrega un nuevo componente hay que ejecutar este comando (opcional)
+## Si se agrega una nueva libreria al proyecto (opcional)
+
+Si se agrega una nueva componente o libreria al proyecto hay que ejecutar este comando para al incluirla en la librerias y no tener que instalarla de manera manual
 
 ```
 pip freeze > requirements.txt
