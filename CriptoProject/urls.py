@@ -44,5 +44,7 @@ urlpatterns = [
 
     path('gKeyDsa/', views.GenerateKeysDsa.as_view(), name='gDeyRsa'),
 
-    path('getFile/', views.SendFile.as_view(), name='getFile')
+    path('getFile/', views.SendFile.as_view(), name='getFile'),
+
+    path('vTemp/', views.ValidateTempratureText.as_view(), name='vTemp'),
 ]

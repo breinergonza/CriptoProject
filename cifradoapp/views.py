@@ -1,6 +1,7 @@
 import Crypto
 import binascii
 import os 
+import requests
 
 from Crypto import Random
 
@@ -372,3 +373,80 @@ class SendFile(APIView):
                 return response
 
         return {'success': False, 'msg': 'Archivo no encontrado'}        
+
+
+class ValidateTempratureText(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):        
+
+        info=request.data       
+
+        minuto = info['minuto']
+        msgDesCifrar = info['temperatura']
+        msgCodificado = info['firma']
+
+        print(minuto)
+        print(msgDesCifrar)
+        print(msgCodificado)
+
+        msgResp = ""
+        success = False
+
+        print("Temperatura a validar: " + msgDesCifrar)
+        signature = bytes.fromhex(msgCodificado)
+
+        key = DSA.import_key(open('./cifradoapp/cifrado/keys/der/public_key_dsa.pem').read())
+        h = SHA256.new(msgDesCifrar.encode("utf8"))
+        verifier = DSS.new(key, 'fips-186-3')
+        
+        try:
+            verifier.verify(h, signature)
+            success = True
+            msgResp = "The message is authentic... Yey!!"
+            print(msgResp)
+
+            urlGrafica = "http://52.23.188.230:5000/grafica"
+            headersGrafica = { 
+                    'Content-Type': 'application/x-www-form-urlencoded' 
+            }
+
+            if minuto == "min_5":   
+                payloadGrafica=f'minuto=min_5&temperatura=0'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+
+                payloadGrafica=f'minuto=min_15&temperatura=0'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+
+                payloadGrafica=f'minuto=min_25&temperatura=0'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+
+                payloadGrafica=f'minuto=min_35&temperatura=0'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+
+                payloadGrafica=f'minuto=min_45&temperatura=0'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+
+                payloadGrafica=f'minuto=min_55&temperatura=0'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+
+                payloadGrafica=f'minuto={minuto}&temperatura={float(msgDesCifrar)}'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+
+                print(response.text) 
+            
+            else:
+                payloadGrafica=f'minuto={minuto}&temperatura={float(msgDesCifrar)}'                
+                response = requests.request("POST", urlGrafica, headers=headersGrafica, data=payloadGrafica)
+                print(response.text)            
+            
+
+        except ValueError:
+            msgResp = "The message is not authentic... :( "
+            print (msgResp)
+
+        data = {
+            "success": success,
+            "result": msgResp
+        }
+
+        return Response(data)
