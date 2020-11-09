@@ -47,4 +47,6 @@ urlpatterns = [
     path('getFile/', views.SendFile.as_view(), name='getFile'),
 
     path('vTemp/', views.ValidateTempratureText.as_view(), name='vTemp'),
+
+    path('codeTxt/', views.CodeTextoPlano.as_view(), name='codeTxt')
 ]

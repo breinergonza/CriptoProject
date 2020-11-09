@@ -375,7 +375,7 @@ class SendFile(APIView):
         return {'success': False, 'msg': 'Archivo no encontrado'}        
 
 
-class ValidateTempratureText(APIView):
+class ValidateTempratureText(APIView):    
     permission_classes = (IsAuthenticated,)
     def post(self, request):        
 
@@ -447,6 +447,34 @@ class ValidateTempratureText(APIView):
         data = {
             "success": success,
             "result": msgResp
+        }
+
+        return Response(data)
+
+
+class CodeTextoPlano(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+
+        info=request.data
+
+        message = info['texto']             
+
+        # Se genera el hash del texto
+        hash_obj = SHA256.new(message.encode("utf8"))
+
+        # Se lee la llave privada
+        key = DSA.import_key(open("./cifradoapp/cifrado/keys/der/private_key_dsa.pem").read())
+        signer = DSS.new(key, 'fips-186-3')
+        signature = signer.sign(hash_obj)
+
+        dts = binascii.hexlify(signature).decode('utf8')
+
+        print(dts)       
+
+        data = {
+            "original": message,
+            "firma": dts
         }
 
         return Response(data)
