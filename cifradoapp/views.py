@@ -39,14 +39,14 @@ class HelloView(APIView):
         content = {'message': 'Hello, World!'}
         return Response(content)
 
-        """Registro de usuarios via POST
+"""Registro de usuarios via POST
 
-        Raises:
-            Http404: [description]
+Raises:
+    Http404: [description]
 
-        Returns:
-            [type]: [description]
-        """
+Returns:
+    [type]: [description]
+"""
 @api_view(['POST',])
 def register_view(request):
     if request.method == 'POST':
@@ -108,8 +108,11 @@ def encript_rsa(request):
     #Se lee el archivo con los datos a encriptar
     datosArchivo = archivo.read()
 
+    #Garantizamos que el texto no sea demasiado largo
+    message = datosArchivo[0:50] 
+
     #Se codifica el mensaje
-    data = datosArchivo.encode("utf-8")
+    data = message.encode("utf-8")
 
     #Ciframos el texto el mensaje con la llave publica
     cipher_rsa = PKCS1_OAEP.new(public_key)
@@ -134,8 +137,6 @@ def encript_rsa(request):
         'data_encrypt':encripted_msg,
         'data_decript':decripted_msg    
     })
-
-
 
 
 def file_text(request):
@@ -229,7 +230,10 @@ class CodeText(APIView):
         # Mensaje a crifrar
         msgArchivo = open(fil, "r")
         msgCifrar = msgArchivo.read()
-        message = msgCifrar        
+        message = msgCifrar  
+
+        #Garantizamos que el texto no sea demasiado largo
+        message = message[0:50]        
 
         # Se genera el hash del texto
         hash_obj = SHA256.new(message.encode("utf8"))
@@ -285,6 +289,9 @@ class DeCodeText(APIView):
         msgCodificado = info['firma']
         msgResp = ""
         success = False
+
+        #Garantizamos que el texto no sea demasiado largo
+        msgDesCifrar = msgDesCifrar[0:50]  
 
         print("Mensaje a validar: " + msgDesCifrar)
         signature = bytes.fromhex(msgCodificado)
@@ -385,6 +392,9 @@ class ValidateTempratureText(APIView):
         msgDesCifrar = info['temperatura']
         msgCodificado = info['firma']
 
+        #Garantizamos que el texto no sea demasiado largo
+        msgDesCifrar = msgDesCifrar[0:50]  
+
         print(minuto)
         print(msgDesCifrar)
         print(msgCodificado)
@@ -458,7 +468,10 @@ class CodeTextoPlano(APIView):
 
         info=request.data
 
-        message = info['texto']             
+        message = info['texto']
+
+        #Garantizamos que el texto no sea demasiado largo
+        message = message[0:50]             
 
         # Se genera el hash del texto
         hash_obj = SHA256.new(message.encode("utf8"))
@@ -466,6 +479,8 @@ class CodeTextoPlano(APIView):
         # Se lee la llave privada
         key = DSA.import_key(open("./cifradoapp/cifrado/keys/der/private_key_dsa.pem").read())
         signer = DSS.new(key, 'fips-186-3')
+
+        # Se firma el hash del texto
         signature = signer.sign(hash_obj)
 
         dts = binascii.hexlify(signature).decode('utf8')
