@@ -1,6 +1,6 @@
 # CriptoProject
 
-Proyecto en Django para el desarrollo de los laboratorios desarrollados en la clase de Criptografia para la MCIC.
+Proyecto desarrollado en Django en el que se implementa una entidad certificadora y algunas funcionalidades para la implementación de criptografia.
 
 ## 1ro. Se restauran los componentes necesarios
 
